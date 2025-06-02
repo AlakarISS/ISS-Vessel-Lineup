@@ -98,7 +98,7 @@ from functools import wraps
 def custom_login_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if not request.session.get('user_id'): 
+        if not request.session.get('Username'): 
             return redirect('signin')  
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -112,7 +112,7 @@ def index_pg(request):
 
         if not user:
             messages.error(request, 'Username does not exist. Please register.')
-            return redirect('signup')
+            return redirect('usersignup')
 
         if user.Password != password:
             messages.error(request, 'Password is incorrect.')
