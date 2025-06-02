@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+  </head>
+  <body>
+    <div class="center">
+
+      {% if messages %}
+          {% for message in messages %}
+              {% if message.tags == 'error' %}
+                  <center><h4 style="color: firebrick;">{{message}}</h4></center>
+              {% else %}
+                  <center><h4 style="color: dodgerblue;">{{message}}</h4></center>
+              {% endif %}
+          {% endfor %}
+      {% endif %}
+      <video class="video-background" autoplay muted loop> <source src="{% static 'assets/Images/INCHCAPE_HEADER_v6.1.mp4' %}" type="video/mp4"> Your browser does not support the video tag. </video>
+      
+      <div class="login">
+        <form method="POST">
+
+          {% csrf_token %}
+          <img src="{% static 'assets/Images/ISS.png' %}" alt="">
+            <h1>REGISTER</h1>
+          <div class="cred">
+            <input type="text" required name="first_name" placeholder="First Name">
+            <input type="text" required name="last_name" placeholder="Last Name">
+            <input type="text" required name="username" placeholder="Username">   
+            <input type="email" required name="email" placeholder="Email">
+            <input type="password" required name="password" placeholder="Password">
+            <input type="text" required name="country" placeholder="Country Name">
+            <input type="text" required name="port" placeholder="Port Name">
+            <select class="usertype"  name="usertype" id="" >
+              <option value="">User Type</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+              <option value="superuser">Super User</option>
+            </select>
+          </div>
+
+          <button class="botton" type="submit">Register</button>
+          <div class="Bottom">
+              <p><a href="{%url 'signin'%}" class="add">Back</a></p>
+          </div>
+        </form>
+      </div>
+  </body>
+</html>

@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract LineUp</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/Images/Picture21.png' %}">
+    <link rel="stylesheet" href="{% static 'css/extractData.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="{% static 'assets/Images/Inchcape-Logo-from-Wordpress.png' %}" alt="">
+        </div>
+        <div class="title">
+            <h1>ISS Shipping India - Vessel LineUp</h1>
+        </div>
+        <div class="menu">
+                {% if request.session.UserType == 'admin' %}
+                <p><a href="{%url 'lineupform'%}" class="nav">LineUp Form</a></p>
+                <p><a href="{%url 'extractdata'%}" class="nav">Extract Data</a></p>
+                <p><a href="{%url 'signin'%}" class="nav">Logout</a></p>
+                <p><a href="{%url 'addportberth'%}" class="nav">Add Port/Berth</a></p>
+                <p><a href="{%url 'signup'%}" class="nav">User Registration</a></p>
+
+                {% elif request.session.UserType == 'superuser' %}
+                <p><a href="{%url 'lineupform'%}" class="nav">LineUp Form</a></p>
+                <p><a href="{%url 'extractdata'%}" class="nav">Extract Data</a></p>
+                <p><a href="{%url 'signin'%}" class="nav">Logout</a></p>
+
+                {% elif request.session.UserType == 'user' %}
+                <p><a href="{%url 'lineupform'%}" class="nav">LineUp Form</a></p>
+                <p><a href="{%url 'signin'%}" class="nav">Logout</a></p>
+                {% endif %}
+            </div>
+    </header>
+    <form method="get" onsubmit="return lineUpForm()">
+        {% csrf_token %}
+        <div class="maincontainer">
+            <section class="container1">
+                <div class="multiselect-container">
+                    <label class="label1" for="port">Port:</label>
+                    <select id="port" class="fill" name="port" multiple required>
+                        {% for port in ports %}
+                            <option value="{{ port }}">{{ port }}</option>
+                        {% endfor %}
+                    </select>
+                    <img class="info" src="{% static 'assets/Images/info icon.png' %}" alt="">
+                </div>
+            </section>
+            <section class="container1">
+                <div class="container1-2">
+                    <label class="label2" for="startDate"> Start Date:</label>
+                    <input class="Datei1" type="date" name="startDate" id="startDate" >
+                </div>
+                <div class="container1-2">
+                    <label class="label2" for="endDate"> End Date:</label>
+                    <input class="Datei1" type="date" name="endDatei" id="endDatei" >
+                </div>
+                <div class="flex2_div">
+                    <label class="label2" for="cargo">Cargo:</label>
+                    <select id="cargo" class="fill" name="cargo">
+                        <option value="">Select Cargo</option>
+                            {% for cargo in cargos %}
+                                <option value="{{ cargo }}">{{ cargo }}</option>
+                            {% endfor %}
+                    </select>
+                </div>
+                
+            </section>
+            <section class="container1">
+                <div class="flex2_div">
+                    <label class="label2" for="vesseltype">Vessel Type:</label>
+                    <select name="vesseltype" id="vesseltype">
+                        <option value="">Select</option>
+                                <option value="Break Bulk">Break Bulk</option>
+                                <option value="Dry Bulk">Dry Bulk</option>
+                                <option value="General Bulk">General Bulk</option>
+                                <option value="Crude Oil Carrier">Crude Oil Carrier</option>
+                                <option value="Edible Oil Carrier">Edible Oil Carrier</option>
+                                <option value="Chemical Carrier">Chemical Carrier</option>
+                                <option value="Gas Carrier">Gas Carrier</option>
+                                <option value="Container Vessel">Container Vessel</option>
+                    </select>
+                </div>
+                <div class="flex2_div">
+                    <label class="label2" for="operation">Operation:</label>
+                    <select name="operation" id="operation" >
+                        <option value="">Select</option>
+                        <option value="Load">Load</option>
+                        <option value="Discharge">Discharge</option>
+                        <option value="Load/Discharge">Load/Discharge</option>
+                    </select>
+                </div>
+                <div class="flex2_div">
+                    <label class="label2" for="loadport">Load Port:</label>
+                    <input id="loadport" class="fill" name="loadport" >
+                </div>
+                
+                <!-- <div class="flex2_div">
+                    <label class="label2" for="agent">Agent :</label>
+                    <input id="agent" class="fill" name="agent" >
+                </div> -->
+            </section>
+            <section class="container1">
+                <div class="flex2_div">
+                    <label class="label2" for="dischargeport">Discharge Port:</label>
+                    <input id="dischargeport" class="fill" name="dischargeport" >
+                </div>
+            </section>
+            <section class="container1">
+                <!-- <button type="reset" class="extbtn" onclick="filterTable()">Filter Results</button> -->
+                <button class="extbtn" id="exportBtn">Export to Excel</button>
+            </section>
+            <Section class="TableArea">
+                <table id="sailedList" class="TVP">
+                    <thead class="tableheader">
+                        <tr>
+                            <th class="Thead">Port</th>
+                            <th class="Thead">Berth</th>
+                            <th class="Thead">Vessel Name</th>
+                            <th class="Thead">Actual Time of Arrival</th>
+                            <th class="Thead">Actual Time of Berth</th>
+                            <th class="Thead">Actual Time of Departure</th>
+                            <th class="Thead">Cargo</th>
+                            <th class="Thead">Cargo Quantity</th>
+                            <th class="Thead">Units</th>
+                            <th class="Thead">Vessel Type</th>
+                            <th class="Thead">Operations</th>
+                            <th class="Thead">Load Port</th>
+                            <th class="Thead">Discharge Port</th>
+                            <th class="Thead">Shipper/Receiver</th>
+                            <th class="Thead">Current Status</th>                                                     
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vessel in sailed_Vessel %} 
+                            <tr>
+                                <td>{{vessel.Port }}</td>
+                                <td>{{vessel.Berth}}</td>
+                                <td>{{vessel.Vessel}}</td>
+                                <td>{{vessel.ETA_ATA_Date|date:"d/m/y" }} {{ vessel.ETA_ATA_Time|time:"H:i" }}</td>
+                                <td>{{vessel.ETB_ATB_Date|date:"d/m/y" }} {{ vessel.ETB_ATB_Time|time:"H:i" }}</td>
+                                <td>{{vessel.ETD_ATD_Date|date:"d/m/y" }} {{ vessel.ETD_ATD_Time|time:"H:i" }}</td>
+
+                                <!-- <td>{{data.ETA_ATA_Date}} {{ data.ETA_ATA_Time}}</td>
+                                <td>{{data.ETB_ATB_Date}} {{ data.ETB_ATB_Time}}</td>
+                                <td>{{data.ETD_ATD_Date}} {{ data.ETD_ATD_Time}}</td> -->
+
+                                <td>{{vessel.Cargo1}}</td>
+                                <td>{{vessel.CargoQty1}}</td>
+                                <td>{{vessel.CargoUnits1}}</td>
+                                <td>{{vessel.VesselType}}</td>
+                                <td>{{vessel.Operations}}</td>
+                                <td>{{vessel.LoadPost}}</td>
+                                <td>{{vessel.dischargePort}}</td>
+                                <td>
+                                    {% if vessel.Shipper and vessel.Receiver %}
+                                        {{ vessel.Shipper }} / {{ vessel.Receiver }}
+                                    {% elif vessel.Shipper %}
+                                        {{ vessel.Shipper }}
+                                    {% elif vessel.Receiver %}
+                                        {{ vessel.Receiver }}
+                                    {% else %}
+                                        <!-- Display nothing if both are empty -->
+                                    {% endif %}
+                                </td>
+                                <td>{{vessel.CurrentStatus}}</td>                            
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                    
+            </Section> 
+        </div> 
+    </form>
+
+<script src="{% static 'js/extractData.js' %}"></script>
+</body>
+</html>
